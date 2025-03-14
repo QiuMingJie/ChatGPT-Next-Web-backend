@@ -1,0 +1,160 @@
+<template>
+  <div class="dashboard-container">
+    <div class="dashboard-search">
+      <el-form :inline="true" :model="form">
+        <el-form-item label="deepseek回答">
+          <el-input size="small" v-model="form.answer" placeholder="输入deepseek回答" clearable @keyup.enter.native="initData"/>
+        </el-form-item>
+        <el-form-item label="问题的原文">
+          <el-input size="small" v-model="form.orgQuestion" placeholder="输入问题的原文" clearable @keyup.enter.native="initData"/>
+        </el-form-item>
+        <el-form-item label="发给deepseek的问题">
+          <el-input size="small" v-model="form.toDeepSeekQuestion" placeholder="输入发给deepseek的问题" clearable @keyup.enter.native="initData"/>
+        </el-form-item>
+        <el-form-item label="userId">
+          <el-input size="small" v-model="form.userId" placeholder="输入发给deepseek的问题" clearable @keyup.enter.native="initData"/>
+        </el-form-item>
+        <el-form-item>
+          <el-button size="small" type="primary" @click="initData">查询</el-button>
+          <el-button size="small" @click="resetFn">重置</el-button>
+        </el-form-item>
+      </el-form>
+    </div>
+    <div class="dashboard-table">
+      <el-table :data="tableData" style="width: 100%" v-loading="loading">
+        <el-table-column type="index" label="序号" width="80"  />
+        <el-table-column prop="id" label="问题id" width="180" />
+        <el-table-column prop="userId" label="问问题的人的id" width="120" />
+        <el-table-column prop="answer" label="deepseek回答" width="360">
+          <template slot-scope="scope">
+            <el-popover trigger="hover" placement="top">
+              <div>{{ scope.row.answer }}</div>
+              <div slot="reference" class="name-wrapper">
+                <el-tag size="medium">{{ scope.row.answer }}</el-tag>
+              </div>
+            </el-popover>
+          </template>
+        </el-table-column>
+        <el-table-column prop="toDeepSeekQuestion" label="发给deepseek的问题" width="360">
+          <template slot-scope="scope">
+            <el-popover trigger="hover" placement="top">
+              <div>{{ scope.row.toDeepSeekQuestion }}</div>
+              <div slot="reference" class="name-wrapper">
+                <el-tag size="medium">{{ scope.row.toDeepSeekQuestion }}</el-tag>
+              </div>
+            </el-popover>
+          </template>
+        </el-table-column>
+        <el-table-column prop="datetime" label="问的时间" width="200" />
+        <el-table-column prop="orgQuestion" label="问题的原文" width="200">
+          <template slot-scope="scope">
+            <el-popover trigger="hover" placement="top">
+              <div>{{ scope.row.orgQuestion }}</div>
+              <div slot="reference" class="name-wrapper">
+                <el-tag size="medium">{{ scope.row.orgQuestion }}</el-tag>
+              </div>
+            </el-popover>
+          </template>
+        </el-table-column>
+        <el-table-column prop="remark" label="备注" width="220" />
+      </el-table>
+      <div class="disboard-page">
+        <el-pagination
+          v-model:current-page="pageParam.page"
+          v-model:page-size="pageParam.size"
+          :page-sizes="[10, 20, 30, 40]"
+          :small="true"
+          :disabled="false"
+          :background="true"
+          layout="sizes, prev, pager, next"
+          :total="pageParam.total"
+          @current-change="handleCurrentChange"
+          @size-change="handleSizeChange"
+        />
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+import { searchTCMchat } from '@/api/table';
+
+
+export default {
+  name: 'Dashboard',
+  data(){
+    return {
+      loading: false,
+      tableData: [],
+      form: {
+        answer: "",
+        orgQuestion: "",
+        userId: "",
+        sortBy: "datetime",
+        sortDirection: "desc", 
+        toDeepSeekQuestion: ""
+      },
+      pageParam: {
+        page: 1,
+        size: 10,
+        total: 0
+      }
+    }
+  },
+  methods: {
+    async initData() {
+      const param = { ...this.form, ...this.pageParam};
+      try{
+        this.loading = true
+        await searchTCMchat({ ...param }).then((res) => {
+          const {content, totalPages} = res.data
+          this.tableData = content
+          this.pageParam.total = totalPages
+          this.loading = false
+        })
+      }catch(error){
+        console.log(error);
+        this.loading = false
+      }
+      
+    },
+    resetFn() {
+      this.form = {
+        answer: "",
+        orgQuestion: "",
+        userId: "",
+        sortBy: "datetime",
+        sortDirection: "desc", 
+        toDeepSeekQuestion: ""
+      }
+      this.pageParam = {
+        page: 1,
+        size: 10
+      }
+      this.initData()
+    },
+    handleCurrentChange(val) {
+      this.pageParam.page = val;
+      this.initData()
+    },
+    handleSizeChange(val){
+      this.pageParam.size = val;
+      this.initData()
+    },
+  },
+  mounted() {
+    this.initData()
+  }
+}
+</script>
+
+<style lang="scss" scoped>
+.dashboard-container {
+  margin: 30px;
+  .disboard-page{
+    display: flex;
+    justify-content: end;
+    margin: 10px 0 ;
+  }
+}
+</style>
