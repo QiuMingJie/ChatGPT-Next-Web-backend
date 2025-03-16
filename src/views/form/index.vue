@@ -15,7 +15,7 @@
           <el-input size="small" v-model="form.answer" placeholder="输入deepseek回答" clearable @keyup.enter.native="initData"/>
         </el-form-item>
         <el-form-item label="聊天类型">
-          <el-select v-model="form.chatType" >
+          <el-select v-model="form.chatType" size="small">
             <el-option label="中医诊断学知识点查询库" value="中医诊断学知识点查询库"></el-option>
             <el-option label="中医诊断学AI出题" value="中医诊断学AI出题"></el-option>
             <el-option label="中医诊断学智能答疑" value="中医诊断学智能答疑"></el-option>
@@ -24,7 +24,7 @@
        
         
         <el-form-item>
-          <el-button size="small" type="primary" @click="initData">查询</el-button>
+          <el-button size="small" type="primary" @click="serachInit">查询</el-button>
           <el-button size="small" @click="resetFn">重置</el-button>
         </el-form-item>
       </el-form>
@@ -118,14 +118,19 @@ export default {
       }
       
     },
+    serachInit() {
+      this.pageParam.page = 1;
+      this.initData()
+    },
     resetFn() {
       this.form = {
+        userId: "",
+        userName: "",
+        chatType: "",
         answer: "",
         orgQuestion: "",
-        userId: "",
         sortBy: "datetime",
         sortDirection: "desc", 
-        toDeepSeekQuestion: ""
       }
       this.pageParam = {
         page: 1,

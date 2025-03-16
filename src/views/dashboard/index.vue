@@ -12,7 +12,7 @@
           <el-input size="small" v-model="form.userName" placeholder="输入用户名" clearable @keyup.enter.native="initData"/>
         </el-form-item>
         <el-form-item>
-          <el-button size="small" type="primary" @click="initData">查询</el-button>
+          <el-button size="small" type="primary" @click="serachInit">查询</el-button>
           <el-button size="small" @click="resetFn">重置</el-button>
         </el-form-item>
       </el-form>
@@ -89,6 +89,10 @@ export default {
     }
   },
   methods: {
+    serachInit() {
+      this.pageParam.page = 1;
+      this.initData()
+    },
     async initData() {
       const param = { ...this.form, ...this.pageParam};
       try{
