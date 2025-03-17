@@ -12,20 +12,13 @@
           <el-input size="small" v-model="form.userName" placeholder="输入用户名" clearable @keyup.enter.native="initData"/>
         </el-form-item>
         <el-form-item>
-          <el-button size="small" type="primary" @click="initData">查询</el-button>
+          <el-button size="small" type="primary" @click="serachInit">查询</el-button>
           <el-button size="small" @click="resetFn">重置</el-button>
         </el-form-item>
       </el-form>
     </div>
     <div class="dashboard-table">
-      <el-upload
-        style="display: inline-block; margin-right: 10px;"
-        action=""
-        :http-request="uploadFileTemplate"
-        :show-file-list="false"
-        >
-        <el-button size="small" type="primary">导入</el-button>
-      </el-upload>
+      <el-button size="small" type="primary" @click="uploadFileTemplate" style="margin-right: 20px;">下载模板</el-button>
       <el-upload
         style="display: inline-block; margin-right: 10px;"
         action=""
@@ -36,6 +29,7 @@
       </el-upload>
       <el-table :data="tableData" style="width: 100%" v-loading="loading">
         <el-table-column type="index" />
+        <el-table-column prop="userId" label="useId" width="120" />
         <el-table-column prop="userClass" label="用户班级" width="180" />
         <el-table-column prop="userName" label="用户名" width="120" />
         <el-table-column prop="userSex" label="性别" width="80" />
@@ -72,6 +66,7 @@
 <script>
 import { getList, resetPassword, setAsAdmin, getUploadTemplate, setUpload } from '@/api/table';
 import user from '@/store/modules/user';
+import axios from 'axios'
 
 export default {
   name: 'Dashboard',
@@ -94,14 +89,18 @@ export default {
     }
   },
   methods: {
+    serachInit() {
+      this.pageParam.page = 1;
+      this.initData()
+    },
     async initData() {
       const param = { ...this.form, ...this.pageParam};
       try{
         this.loading = true
         await getList({ ...param }).then((res) => {
-          const {content, totalPages} = res.data
+          const {content, totalElements} = res.data
           this.tableData = content
-          this.pageParam.total = totalPages
+          this.pageParam.total = totalElements
           this.loading = false
         })
       }catch(error){
@@ -187,17 +186,35 @@ export default {
         this.initData()
       })
     },
-    uploadFileTemplate(){
-      let formData = new FormData();
-      let file = item.file;
-      formData.append('file', file);
-      getUploadTemplate(formData).then(res => {
-        this.$message({
-          type:'success',
-          message: '导入成功!'
-        });
-        this.initData()
-      })
+    download(blob, filename) {
+      // 创建 Blob URL
+        const url = window.URL.createObjectURL(blob);
+
+      // 创建 <a> 标签
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', filename); // 设置下载文件名
+
+      // 触发下载
+      document.body.appendChild(link);
+      link.click();
+
+      // 清理
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    },
+
+    async uploadFileTemplate(){
+      try{
+        await axios.get(`${process.env.VUE_APP_BASE_API}/ios/class/diagnosis/user/getUploadTemplate`,{ responseType: 'blob' }).then((response) => {
+            // const response = await getUploadTemplate()
+          console.log(1111, response)
+          this.download(response.data, '导出.xlsx')
+        })
+      } catch(err) {
+        console.log(err)
+      }
+      
     }
   },
   mounted() {

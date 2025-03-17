@@ -43,13 +43,7 @@ export function setUpload(data) {
   })
 }
 
-export function getUploadTemplate(data) {
-  return request({
-    url: '/ios/class/diagnosis/user/getUploadTemplate',
-    method: 'post',
-    data
-  })
-}
+
 
 
 
