@@ -15,7 +15,7 @@
           <el-input size="small" v-model="form.answer" placeholder="输入deepseek回答" clearable @keyup.enter.native="initData"/>
         </el-form-item>
         <el-form-item label="聊天类型">
-          <el-select v-model="form.chatType" size="small">
+          <el-select v-model="form.chatType" size="small" clearable placeholder="请选择">
             <el-option label="中医诊断学知识点查询库" value="中医诊断学知识点查询库"></el-option>
             <el-option label="中医诊断学AI出题" value="中医诊断学AI出题"></el-option>
             <el-option label="中医诊断学智能答疑" value="中医诊断学智能答疑"></el-option>
@@ -55,6 +55,7 @@
             </el-popover>
           </template>
         </el-table-column>
+        <el-table-column prop="chatType" label="聊天类型" minWidth="200" resizable></el-table-column>
         <el-table-column prop="datetime" label="时间" width="200"  resizable/>
       </el-table>
       <div class="disboard-page">
